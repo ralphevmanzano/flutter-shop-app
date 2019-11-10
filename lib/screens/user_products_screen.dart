@@ -6,6 +6,11 @@ import 'package:flutter_shop_app/widgets/user_product_item.dart';
 import 'package:provider/provider.dart';
 
 class UserProductScreen extends StatelessWidget {
+  
+  Future<void> _refreshProducts(BuildContext context) async {
+    await Provider.of<Products>(context, listen: false).fetchAndSetProducts();
+  }
+  
   @override
   Widget build(BuildContext context) {
     final productData = Provider.of<Products>(context);
@@ -23,23 +28,25 @@ class UserProductScreen extends StatelessWidget {
         ],
       ),
       drawer: AppDrawer(),
-      body: Consumer<Products>(
-        builder: (ctx, products, child) => Padding(
-          padding: EdgeInsets.all(8),
-          child: ListView.builder(
-            itemBuilder: (_, i) {
-              return Column(
-                children: <Widget>[
-                  UserProductItem(
-                    id: productData.items[i].id,
-                    title: productData.items[i].title,
-                    imageUrl: productData.items[i].imageUrl,
-                  ),
-                ],
-              );
-            },
-            
-            itemCount: products.items.length,
+      body: RefreshIndicator(
+        onRefresh: () => _refreshProducts(context),
+        child: Consumer<Products>(
+          builder: (ctx, products, child) => Padding(
+            padding: EdgeInsets.all(8),
+            child: ListView.builder(
+              itemBuilder: (_, i) {
+                return Column(
+                  children: <Widget>[
+                    UserProductItem(
+                      id: productData.items[i].id,
+                      title: productData.items[i].title,
+                      imageUrl: productData.items[i].imageUrl,
+                    ),
+                  ],
+                );
+              },
+              itemCount: products.items.length,
+            ),
           ),
         ),
       ),

@@ -7,7 +7,7 @@ import 'package:flutter_shop_app/widgets/badge.dart';
 import 'package:flutter_shop_app/widgets/products_grid.dart';
 import 'package:provider/provider.dart';
 
-enum FIlterOptions {
+enum FilterOptions {
   Favorites,
   All,
 }
@@ -18,7 +18,28 @@ class ProductsOverviewScreen extends StatefulWidget {
 }
 
 class _ProductsOverviewScreenState extends State<ProductsOverviewScreen> {
-  bool _showOnlyFavorites = false;
+  var _showOnlyFavorites = false;
+  var _isInit = true;
+  var _isLoading = false;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+
+    if (_isInit) {
+      setState(() {
+        _isLoading = true;
+      });
+      Provider.of<Products>(context).fetchAndSetProducts().then((_) {
+        setState(() {
+          _isLoading = false;
+        });
+      });
+      setState(() {
+        _isInit = false;
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -27,9 +48,9 @@ class _ProductsOverviewScreenState extends State<ProductsOverviewScreen> {
         title: Text('MyShop'),
         actions: <Widget>[
           PopupMenuButton(
-            onSelected: (FIlterOptions selectedValue) {
+            onSelected: (FilterOptions selectedValue) {
               setState(() {
-                if (selectedValue == FIlterOptions.Favorites) {
+                if (selectedValue == FilterOptions.Favorites) {
                   _showOnlyFavorites = true;
                 } else {
                   _showOnlyFavorites = false;
@@ -42,11 +63,11 @@ class _ProductsOverviewScreenState extends State<ProductsOverviewScreen> {
             itemBuilder: (_) => [
               PopupMenuItem(
                 child: Text('Only Favorites'),
-                value: FIlterOptions.Favorites,
+                value: FilterOptions.Favorites,
               ),
               PopupMenuItem(
                 child: Text('Show All'),
-                value: FIlterOptions.All,
+                value: FilterOptions.All,
               )
             ],
           ),
@@ -66,7 +87,11 @@ class _ProductsOverviewScreenState extends State<ProductsOverviewScreen> {
           )
         ],
       ),
-      body: ProductsGrid(showFaves: _showOnlyFavorites),
+      body: _isLoading
+          ? Center(
+              child: CircularProgressIndicator(),
+            )
+          : ProductsGrid(showFaves: _showOnlyFavorites),
       drawer: AppDrawer(),
     );
   }

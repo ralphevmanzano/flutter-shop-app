@@ -15,7 +15,6 @@ class CartTotalCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-
     return Card(
       margin: EdgeInsets.all(16),
       child: Padding(
@@ -42,23 +41,71 @@ class CartTotalCard extends StatelessWidget {
               ),
               backgroundColor: Theme.of(context).primaryColor,
             ),
-            FlatButton(
-              child: Text('Checkout'),
-              textColor: Theme.of(context).primaryColor,
-              onPressed: () {
-                Provider.of<Orders>(
-                  context,
-                  listen: false,
-                ).addOrder(
-                  cart.items,
-                  cart.totalAmount,
-                );
-                cart.clear();
-              },
+            OrderButton(
+              cartTotalAmount: cartTotalAmount,
+              cart: cart,
             )
           ],
         ),
       ),
+    );
+  }
+}
+
+class OrderButton extends StatefulWidget {
+  const OrderButton({
+    Key key,
+    @required this.cartTotalAmount,
+    @required this.cart,
+  }) : super(key: key);
+
+  final double cartTotalAmount;
+  final Cart cart;
+
+  @override
+  _OrderButtonState createState() => _OrderButtonState();
+}
+
+class _OrderButtonState extends State<OrderButton> {
+  var _isLoading = false;
+
+  @override
+  Widget build(BuildContext context) {
+    final scaffold = Scaffold.of(context);
+
+    return FlatButton(
+      child: _isLoading ? CircularProgressIndicator() : Text('Checkout'),
+      textColor: Theme.of(context).primaryColor,
+      onPressed: (widget.cartTotalAmount <= 0 || _isLoading)
+          ? null
+          : () async {
+              setState(() {
+                _isLoading = true;
+              });
+              try {
+                await Provider.of<Orders>(
+                  context,
+                  listen: false,
+                ).addOrder(
+                  widget.cart.items,
+                  widget.cart.totalAmount,
+                );
+                widget.cart.clear();
+              } catch (_) {
+                scaffold.hideCurrentSnackBar();
+                scaffold.showSnackBar(
+                  SnackBar(
+                    content: Text(
+                      'Error checkout',
+                      textAlign: TextAlign.center,
+                    ),
+                    duration: Duration(seconds: 2),
+                  ),
+                );
+              } finally {
+                _isLoading = false;
+              }
+            },
     );
   }
 }
