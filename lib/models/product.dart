@@ -36,8 +36,8 @@ class Product with ChangeNotifier {
     return '[Product $id: title $title, description $description, price $price, imageUrl $imageUrl, isFavorite $isFavorite]';
   }
 
-  Future<void> toggleFavoriteStatus() async {
-    final url = 'https://flutter-recipe-93c67.firebaseio.com/products/$id';
+  Future<void> toggleFavoriteStatus(String authToken) async {
+    final url = 'https://flutter-recipe-93c67.firebaseio.com/products/$id?auth=$authToken';
     isFavorite = !isFavorite;
     notifyListeners();
     final response =

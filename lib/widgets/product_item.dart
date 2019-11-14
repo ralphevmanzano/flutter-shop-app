@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/material.dart' as prefix0;
 import 'package:flutter_shop_app/constants/routes.dart';
 import 'package:flutter_shop_app/models/product.dart';
+import 'package:flutter_shop_app/providers/auth.dart';
 import 'package:flutter_shop_app/providers/cart_provider.dart';
 import 'package:provider/provider.dart';
 
@@ -11,7 +12,7 @@ class ProductItem extends StatelessWidget {
     final scaffold = Scaffold.of(context);
     final product = Provider.of<Product>(context, listen: false);
     final cart = Provider.of<Cart>(context, listen: false);
-
+    final auth = Provider.of<Auth>(context, listen: false);
     return ClipRRect(
       borderRadius: BorderRadius.circular(8),
       child: GestureDetector(
@@ -34,7 +35,7 @@ class ProductItem extends StatelessWidget {
               ),
               onPressed: () async {
                 try {
-                  await product.toggleFavoriteStatus();
+                  await product.toggleFavoriteStatus(auth.token);
                 } catch (err) {
                   scaffold.hideCurrentSnackBar();
                   scaffold.showSnackBar(
